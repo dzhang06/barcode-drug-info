@@ -409,7 +409,7 @@ intro_label = Label(window, text="Welcome to the barcode extraction tool. \n Ple
                                  "Scan barcode into box below and mark the correct type and hit submit")
 
 # barcode_label = Label(window, text = "Scan 2d barcode into this box")
-barcode_entry = Entry(window, width=75)
+barcode_entry = Text(window, width=75)
 box_barcode = Radiobutton(window, text="2d barcode", value=1, variable=var)
 linear_barcode = Radiobutton(window, text="linear barcode", value=2, variable=var)
 proceed_button = Button(window, text="Submit", command=run)
