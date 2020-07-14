@@ -1,6 +1,6 @@
-import re
+# import re
 import pandas as pd
-import sys
+# import sys
 from dateutil.parser import parse
 from tkinter import *
 from tkinter import messagebox
@@ -12,140 +12,26 @@ from datetime import datetime
 import requests
 import os
 
-# select = input('Which example barcode do you want to pick? or scan? ')
-
-# def which_barcode(response):
-#     switcher = {
-#         # Must configure barcode scanner to read FNC1 codes inside the barcode and program to add tab
-#         '1': '012037086010010821TXZ811R4ZKNC	1723022810MT005', # azithromycin 500 mg box
-#         '2': '01003633232956152155656222103517	17210630106019894', # vanco 5 gm vial box 363323295615 upc
-#         '3': '010030049052083621303978156223	172207311033006308', # pen g 5 mil unit vial box
-#         '4': "012037086012130121F83768X2HM3P	17220131109B08TQ", # zosyn 3.375 gm vial box (01)20370860121301 upc
-#         # '5': '(01)00312345678906(21)SN345678(10)LN145(17)20181127',
-#         '5': '01003442062511022126386940975151	1722102010P100149569',
-#         '6': '010036068740583421100000968736	172202281020B88',
-#         '7': '010036846233190321EAEV63DY6T9T	172112311019200264',
-#         '8': '01003666851001152120000000010964	1721103110KC7045',
-#         '9': '01203633232842002140366616241856	1721022810167918',
-#         '10': '01003633232956152116749482636589	17210630106019894',
-#         '11': '012037086012130121FZ7N875BGT7Z	17220131109B08TQ'
-#         }
-#     return switcher.get(response)
-#
-# raw_barcode = which_barcode(select)
-
-# example1 = ' 01  2 03 7086010010 8  21  TXZ811R4ZKNC   17 230228 10 MT005' # azithromycin 500 mg box
-# example2 = ' 01  0 03 6332329561 5  21  55656222103517 17 210630 10 6019894' # vanco 5 gm vial box 363323295615 upc
-# example3 = ' 01  0 03 0049052083 6  21  303978156223   17 220731 10 33006308' # pen g 5 mil unit vial box
-# example4 = ' 01  2 03 7086012130 1  21  F83768X2HM3P   17 220131 10 9B08TQ' # zosyn 3.375 gm vial box (01)20370860121301 upc
-# example5 = "(01) 0 03 1234567890 6 (21) SN345678 (10) LN145 (17) 20181127"
-
-
-#  general overview of codes
-# https://www.cardinalhealth.com/content/dam/corp/web/documents/data-sheet/Cardinal-Health-barcode-quick-start-guidelines.pdf
-
-# after serial number, will be fnc1 signal. can reprogram see site below. this allows to separate variable length
-# serial number and tell where it ends
-
-# program fnc1 to characters
-# https://support.honeywellaidc.com/s/article/How-to-substitute-the-FNC1-GS-characters-in-GS1-128-UCC-EAN128-or-GS1-Datamatrix-bar-code
-
-# 01 - GTIN? global trade item number
-# 17 - expiration date
-# 10 - LOT
-# 21 - serial number
-
-# raw_barcode = input("Scan barcode now: ")
-# raw_barcode += input()
-# raw_barcode += input()
-# raw_barcode += input()
-# print("Barcode: " , raw_barcode)
-
-# PATTERN #1 WITH PARENTHESIS
-# pattern = re.compile(r'^(\(01\)|\(21\)|\(17\)|\(10\)){1}(.+?)(\(21\)|\(17\)|\(10\))(.+?)(\(01\)|\(21\)|\(17\)|\(10\))(.+?)(\(01\)|\(21\)|\(17\)|\(10\)){1}(.+)')
-# https://regex101.com/r/YgGtjZ/6
-
-# PATTERN 2 with and without parenthesis
-# pattern = re.compile(r'^(\(01\)|01|\(21\)|21|\(17\)|17|\(10\)|10){1}(\d{14})(\(21\)|21|\(17\)|17|\(10\)|10)(.+?)(\(\(21\)|21|\(17\)|17|\(10\)|10)(.+?)(\(21\)|21|\(17\)|17|\(10\)|10){1}(.+)$')
-
-# PATTERN 3 ignore parenthesis case, incorporate tab after serial number
 pattern = re.compile(r"^(01){1}(\d{14})(21){1}(.+?)\t(17){1}(\d{6})(10){1}(.+)$")
 
 
-# result = pattern.match(raw_barcode)
-
-# print(result.group(1))
-# print(result.group(2))
-# print(result.group(3))
-# print(result.group(4))
-# print(result.group(5))
-# print(result.group(6))
-# print(result.group(7))
-# print(result.group(8))
-# print('Full result list: ', result.groups())
-
-# result_list = list(result.groups())
-
-def remove_parenth(lst):
-    res_list = lst
-    bad_chars = '()'
-    # res_lst = for c in bad_chars: s = s.replace(c, "")
-    # print('Starting loop...')
-    # for item in res_list:
-    #     print('Fixing: ',item)
-    #     for c in bad_chars:
-    #         item = item.replace(c,"")
-    #         print('Fixed? ',item)
-
-    # a[:] = [x + 2 for x in a]
-    # res_list = item.replace(c,"") for c in bad_chars for item in res_list
-
-    # res_list = [item.replace(c,"") for item in res_list for c in bad_chars]
-    # print('type of res_list: ', type(res_list))
-    for pos, item in enumerate(res_list):
-        for c in bad_chars:
-            item = item.replace(c, "")
-            res_list[pos] = item
-    return res_list
-
-
-# result_list = remove_parenth(result_list)
-# print('Parenths removed: ', result_list)
-
 def convert_to_dict(lst):
+    """ converts the one liner barcode string into individual components through dict """
     res_dct = {lst[i]: lst[i + 1] for i in range(0, len(lst), 2)}
     return res_dct
 
 
-# result_dict = convert_to_dict(result_list)
-
-
-# print('Full result dictionary: ', result_dict)
-
-# result_dict['GTIN'] = result_dict.pop('01')
-# result_dict['Exp date'] = result_dict.pop('17')
-# result_dict['LOT'] = result_dict.pop('10')
-# result_dict['Serial'] = result_dict.pop('21')
-#
-# temp = parse(result_dict['Exp date'])
-# print('Date parsing... ', temp)
-# result_dict['Exp date'] = datetime.strptime(result_dict['Exp date'], '%y%m%d').strftime("%m/%d/%Y")
-
-# print('Renamed full result dictionary: ', result_dict)
-
-# need validation for day of 00
-
 def converter(unrefined_date):
+    """ converts barcode date of YYMMDD to mm/dd/yyyy """
     return parse(unrefined_date, yearfirst=True, fuzzy=True).strftime('%m/%d/%Y')
 
-def get_recent_db():
-    # gets most recent ndc db
-    return
 
-def match_NDC(ndc):
-
+def match_ndc(ndc):
+    """
+    Matches the NDC
+    """
     def find_recent_db():
-        # returns most recent db csv file
+        """ returns most recent db csv file """
         files = glob.glob('ndcdb-*.csv')
 
         pattern = re.compile(r"^ndcdb-(\d{4}-\d{2}-\d{2}).csv$")
@@ -191,33 +77,15 @@ def match_NDC(ndc):
     else:
         print("Doesn't exist")
         sys.exit()
-        # return False
 
-
-# result_dict['Exp date'] = converter(result_dict['Exp date'])
-# result_dict['NDC'] = result_dict['GTIN'][3:13]
-#
-# match, with_hyphen, ndc_11, package, brand, generic, dosage_form, route, mfg, \
-# strength,str_units, pharm_class = match_NDC(result_dict['NDC'])
-#
-# # print('Barcode Info ', result_dict)
-# print('NDC: ', result_dict['NDC'])
-# print('LOT: ', result_dict['LOT'])
-# print('Exp date: ',result_dict['Exp date'])
-# # print('Check if ', result_dict['NDC'], ' matches: ', str(match) )
-# print('NDC with hyphen: ', with_hyphen)
-# print('11 digit ndc: ' , ndc_11)
-# print('Package Description: ', package)
-# print('Brand Name: ', brand)
-# print('Generic Name: ', generic)
-# print('Strength: ', strength, str_units)
-# # print('Units: ', str_units)
-# print('Dosage Form: ', dosage_form)
-# print('Route: ',route )
-# print('Manufacturer/Labeler: ',mfg)
-# print('Pharmaceutical Class: ', pharm_class)
 
 def generate_db(event=None):
+    """
+    Generates the fda ndc database
+    :param event:
+    :return:
+    """
+
 
     url = "https://www.accessdata.fda.gov/cder/ndctext.zip"
     print("Downloading db from ", url)
@@ -284,7 +152,7 @@ def run(event=None):
             result_dict['NDC'] = result_dict['GTIN'][3:13]
             # cross reference FDA NDC database
             match, with_hyphen, ndc_11, package, brand, generic, dosage_form, route, mfg, \
-            strength, str_units, pharm_class = match_NDC(result_dict['NDC'])
+            strength, str_units, pharm_class = match_ndc(result_dict['NDC'])
 
             # print('Barcode Info ', result_dict)
             print('11 digit ndc: ', ndc_11)
@@ -326,7 +194,7 @@ def run(event=None):
             result = pattern.match(raw_barcode).groups()[0]
 
             match, with_hyphen, ndc_11, package, brand, generic, dosage_form, route, mfg, \
-            strength, str_units, pharm_class = match_NDC(result)
+            strength, str_units, pharm_class = match_ndc(result)
 
             # print('Barcode Info ', result_dict)
             print('11 digit ndc: ', ndc_11)
