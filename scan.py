@@ -3,6 +3,7 @@ import pandas as pd
 import sys
 from dateutil.parser import parse
 from tkinter import *
+from tkinter import messagebox
 from functools import partial
 import glob
 import sys
@@ -218,7 +219,6 @@ def match_NDC(ndc):
 
 def generate_db(event=None):
 
-    # popupmsg("Working...")
     url = "https://www.accessdata.fda.gov/cder/ndctext.zip"
     print("Downloading db from ", url)
     r = requests.get(url)
@@ -264,11 +264,12 @@ def run(event=None):
         selection = var.get()
         if selection == 0:
             popupmsg("No barcode type selected. Please select type of barcode")
+            return 'break'
         elif selection == 1:
             # code for 2d barcode below
             # run the program
             # get input barcode from user
-            raw_barcode = barcode_entry.get()
+            raw_barcode = barcode_text.get("1.0","end-1c")
             # match this pattern
             pattern = re.compile(r"^(01){1}(\d{14})(21){1}(.+?)\t(17){1}(\d{6})(10){1}(.+)$")
             result = pattern.match(raw_barcode)
@@ -316,10 +317,11 @@ def run(event=None):
             ndc_route_result["text"] = route
             ndc_mfg_result["text"] = mfg
             ndc_class_result["text"] = pharm_class
+            return 'break'
 
         elif selection == 2:
             # code for linear barcode below
-            raw_barcode = barcode_entry.get()
+            raw_barcode = barcode_text.get()
             pattern = re.compile(r"^\d(\d{10})\d$")
             result = pattern.match(raw_barcode).groups()[0]
 
@@ -357,6 +359,7 @@ def run(event=None):
             ndc_route_result["text"] = route
             ndc_mfg_result["text"] = mfg
             ndc_class_result["text"] = pharm_class
+            return 'break'
     except:
         if selection == 1:
             sel = "2d barcode"
@@ -370,23 +373,15 @@ def run(event=None):
                  "4. Make sure there's a 'ndcdb' file in the same folder as this file.\n\n"
                  "Program is still too ghetto to tell you which one of these is causing the error :)")
         print("See error message")
+        return 'break'
 
 
 def popupmsg(msg):
-    LARGE_FONT = ("Verdana", 12)
-    NORM_FONT = ("Helvetica", 10)
-    SMALL_FONT = ("Helvetica", 8)
-    popup = Tk()
-    popup.wm_title("!")
-    label = Label(popup, text=msg, font=NORM_FONT, justify=LEFT)
-    label.pack(side="top", fill="x", pady=10)
-    B1 = Button(popup, text="Okay", command=popup.destroy)
-    B1.pack()
-    popup.mainloop()
+    messagebox.showinfo("!",msg)
 
 
 def copy_button(label):
-    clip = Tk()
+    clip = Toplevel()
     clip.withdraw()
     clip.clipboard_clear()
     clip.clipboard_append(label.cget("text"))  # Change INFO_TO_COPY to the name of your data source
@@ -409,12 +404,11 @@ intro_label = Label(window, text="Welcome to the barcode extraction tool. \n Ple
                                  "Scan barcode into box below and mark the correct type and hit submit")
 
 # barcode_label = Label(window, text = "Scan 2d barcode into this box")
-barcode_entry = Text(window, width=75)
+barcode_text = Text(window, width=75, height=2, font=("Helvetica", 10), wrap='none')
 box_barcode = Radiobutton(window, text="2d barcode", value=1, variable=var)
 linear_barcode = Radiobutton(window, text="linear barcode", value=2, variable=var)
 proceed_button = Button(window, text="Submit", command=run)
-window.bind('<Return>', run)
-
+barcode_text.bind('<Return>', run)
 generatedb_button = Button(window, text="Generate DB",command=generate_db)
 lastupdated_label = Label(window)
 close_button = Button(window, text="Quit", command=window.quit)
@@ -475,7 +469,7 @@ ndc_class_button = Button(window, text="Copy", command=partial(copy_button, ndc_
 
 intro_label.grid(row=0, column=0, columnspan=3, sticky=W + E)
 
-barcode_entry.grid(row=1, rowspan=3, columnspan=2, sticky=E + S)
+barcode_text.grid(row=1, rowspan=3, columnspan=2, sticky=E + S)
 box_barcode.grid(row=1, column=2, sticky=W)
 linear_barcode.grid(row=2, column=2, sticky=W)
 proceed_button.grid(row=3, column=2, sticky=W)
