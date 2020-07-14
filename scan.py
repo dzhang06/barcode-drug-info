@@ -138,10 +138,12 @@ def run(event=None):
             # run the program
             # get input barcode from user
             raw_barcode = barcode_text.get("1.0","end-1c")
+            print("Scanned barcode: ", raw_barcode) # debug
             # match this pattern
             pattern = re.compile(r"^(01){1}(\d{14})(21){1}(.+?)\t(17){1}(\d{6})(10){1}(.+)$")
             result = pattern.match(raw_barcode)
             result_list = list(result.groups())
+            print("List of parsed barcode components: ", result_list) # debug
             # convert to dictionary
             result_dict = convert_to_dict(result_list)
             result_dict['GTIN'] = result_dict.pop('01')
@@ -151,6 +153,7 @@ def run(event=None):
             result_dict['Exp date'] = converter(result_dict['Exp date'])
             result_dict['NDC'] = result_dict['GTIN'][3:13]
             # cross reference FDA NDC database
+            print("Dictionary converted")
             match, with_hyphen, ndc_11, package, brand, generic, dosage_form, route, mfg, \
             strength, str_units, pharm_class = match_ndc(result_dict['NDC'])
 
@@ -189,7 +192,7 @@ def run(event=None):
 
         elif selection == 2:
             # code for linear barcode below
-            raw_barcode = barcode_text.get()
+            raw_barcode = barcode_text.get("1.0","end-1c")
             pattern = re.compile(r"^\d(\d{10})\d$")
             result = pattern.match(raw_barcode).groups()[0]
 
