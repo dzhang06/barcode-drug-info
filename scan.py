@@ -140,7 +140,8 @@ def run(event=None):
             raw_barcode = barcode_text.get("1.0","end-1c")
             print("Scanned barcode: ", raw_barcode) # debug
             # match this pattern
-            pattern = re.compile(r"^(01){1}(\d{14})(21){1}(.+?)\t(17){1}(\d{6})(10){1}(.+)$")
+            # pattern = re.compile(r"^(01){1}(\d{14})(21){1}(.+?)\t(17){1}(\d{6})(10){1}(.+)$")
+            pattern = re.compile(r"^(01){1}(\d{14})(21|10){1}(.+?)\t(17){1}(\d{6})(10|21){1}(.+)$")
             result = pattern.match(raw_barcode)
             result_list = list(result.groups())
             print("List of parsed barcode components: ", result_list) # debug
