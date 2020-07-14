@@ -3,7 +3,7 @@ Get drug data from 2d and linear barcodes on drug packaging
 
 Will fill out readme later...
 
-###Sample 2d barcode examples:
+### Sample 2d barcode examples:
 
 *note: Must configure barcode scanner to read FNC1 codes inside the barcode and program to add tab*
 
