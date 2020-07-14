@@ -73,3 +73,12 @@ https://support.honeywellaidc.com/s/article/How-to-substitute-the-FNC1-GS-charac
 
 For anyone else reading this, you may need to find a way to do this with your own scanners before this script works for
 you. 
+
+
+---------------------
+
+seems oral forms don't work due to the 10 and 21 being reversed. Examples below.
+
+0100301855600019-10JM8886	17220131-2110000000314342
+
+0100300780659673-10ALEA073	17220731-2191614702004822
