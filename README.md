@@ -1,29 +1,83 @@
 # barcode-drug-info
 Get drug data from 2d and linear barcodes on drug packaging 
 
-Will fill out readme later...
+## Overview
 
-### Sample 2d barcode examples:
+The function of this script is to translate barcodes on drug packaging into drug information. An addon, but required, 
+function generates the database from which the information is retrieved 
+(https://www.accessdata.fda.gov/cder/ndctext.zip). It only needs to be run once and will download and process the files
+needed to make the data available offline. The date of the most recent update is noted.
 
-*note: Must configure barcode scanner to read FNC1 codes inside the barcode and program to add tab*
+### Requirements
 
-- ``012037086010010821TXZ811R4ZKNC	1723022810MT005`` 
-    - azithromycin 500 mg box
-- ``01003633232956152155656222103517	17210630106019894`` 
-    - vanco 5 gm vial box 363323295615 upc
-- ``010030049052083621303978156223	172207311033006308`` 
-    - pen g 5 mil unit vial box
-- ``012037086012130121F83768X2HM3P	17220131109B08TQ`` 
-    - zosyn 3.375 gm vial box (01)20370860121301 upc
-- ``01003442062511022126386940975151	1722102010P100149569``
-- ``010036068740583421100000968736	172202281020B88``
-- ``010036846233190321EAEV63DY6T9T	172112311019200264``
-- ``01003666851001152120000000010964	1721103110KC7045``
-- ``01203633232842002140366616241856	1721022810167918``
-- ``01003633232956152116749482636589	17210630106019894``
-- ``012037086012130121FZ7N875BGT7Z	17220131109B08TQ``
-- *linear barcodes to follow*
+1. If running for the first time, a working internet connection to generate the FDA NDC database which will be saved to 
+the current directory
+2. Compatible barcode scanner that can read a FNC1 signal from the barcode and substitute with a tab input
+3. Patience. I am still very noob and keep finding new bugs. Please report them on github. 
 
+### Purpose
+
+Pharmacies often need to manually transcribe information from drug packaging into internal systems. New manufacturers 
+or a change in NDC information requires non-trivial maintenance to ensure smooth transition between the new drug product
+and internal pharmacy and nursing systems. 
+
+The manual process entry can be very error-prone. While NDC information may be easily obtained by a wholesaler's online 
+purchasing system, a small 1 character wrong error transcribing the LOT, expiration date, and NDC conversions from 
+10-digit to 11-digit can lead to devastating downstream effects. Machine-readable barcodes significantly reduce this 
+error.
+
+This script allows the pharmacy user to quickly and easily scan packages straight from either the packaged box or 
+individual units and copy the required information to the clipboard straight from the FDA NDC drug resource.
+
+![Demo](barcode-script-demo.PNG?raw=true "Demo")
+
+### Examples of barcodes inputs that the script accepts
+
+*Note: Must configure barcode scanner to read FNC1 codes to add tab input.* 
+
+- 2d barcodes:
+    - regex (matches following combination: GTIN-SN-EXP-LOT and GTIN-LOT-EXP-SN):
+        - ```^(01){1}(\d{14})(21|10){1}(.+?)\t(17){1}(\d{6})(10|21){1}(.+)$```
+    - ``012037086010010821TXZ811R4ZKNC	1723022810MT005`` 
+        - azithromycin 500 mg box
+    - ``01003633232956152155656222103517	17210630106019894`` 
+        - vanco 5 gm vial box 363323295615 upc
+    - ``010030049052083621303978156223	172207311033006308`` 
+        - pen g 5 mil unit vial box
+    - ``012037086012130121F83768X2HM3P	17220131109B08TQ`` 
+        - zosyn 3.375 gm vial box (01)20370860121301 upc
+    - ``01003442062511022126386940975151	1722102010P100149569``
+    - ``010036068740583421100000968736	172202281020B88``
+    - ``010036846233190321EAEV63DY6T9T	172112311019200264``
+    - ``01003666851001152120000000010964	1721103110KC7045``
+    - ``01203633232842002140366616241856	1721022810167918``
+    - ``01003633232956152116749482636589	17210630106019894``
+    - ``012037086012130121FZ7N875BGT7Z	17220131109B08TQ``
+    - ``010030185560001910JM8886	172201312110000000314342``
+        - this barcode flipped serial number and lot number around
+    - ``0100300780659673-10ALEA073	17220731-2191614702004822``
+        - barcode on this flipped around too
+- *linear barcodes to follow. Certain types include (not all are currenlty implemented)*
+    - follow pattern of straight 10 digit ndc found on some packages 
+        - ``(^\d{10}$)``
+    - follow standard UPC pattern of 12 digit with 1 random number in front and behind 
+        - ```^\d(\d{10})\d$```
+    - follow another pattern of 16 digits that incorporates the 01 prefix followed by 3 useless digits, 10 digit ndc, 
+    then random digit 
+        - ```^01\d{3}(\d{10})\d$```
+    - combined regex.. still testing.. ``^01\d{3}(\d{10})\d$|^\d(\d{10})\d$|(^\d{10}$)``
+
+
+### Overview of development
+
+This is the most important resource I used to learn about how to deconstruct the barcodes. Very useful.
+
+[Cardinal Health Barcode Quick Start Guidelines PDF](https://www.cardinalhealth.com/content/dam/corp/web/documents/data-sheet/Cardinal-Health-barcode-quick-start-guidelines.pdf)
+
+Barcodes, depending on type, fulfill different requirements by the FDA. The 
+[Drug Supply Chain Security Act](https://www.fda.gov/drugs/drug-supply-chain-integrity/drug-supply-chain-security-act-dscsa) 
+requires that all drug packaging have both a machine and human readable label that contains information that can be for 
+tracking purposes. 
 
 2d Barcodes are broken down into components:
 
@@ -48,13 +102,9 @@ Here are a few examples of the above broken down into its components:
 - ``01  2 03 7086012130 1  21  F83768X2HM3P   17 220131 10 9B08TQ`` 
 - ``01  0 03 1234567890 6  21  SN345678       17 181127 10 LN145``
 
-### General overview of codes
 
-This is the most important resource I used to learn about how to deconstruct the barcodes. Very useful.
 
-https://www.cardinalhealth.com/content/dam/corp/web/documents/data-sheet/Cardinal-Health-barcode-quick-start-guidelines.pdf
-
-### Complicated hiccup
+### Building the script
 
 One issue I ran into when I originally started to work on this was how to parse those four components of the barcode 
 into their individual components. First I tried isolating out the 01, 21, 17, and 10 codes and then realized that these 
@@ -73,12 +123,3 @@ https://support.honeywellaidc.com/s/article/How-to-substitute-the-FNC1-GS-charac
 
 For anyone else reading this, you may need to find a way to do this with your own scanners before this script works for
 you. 
-
-
----------------------
-
-seems oral forms don't work due to the 10 and 21 being reversed. Examples below.
-
-0100301855600019-10JM8886	17220131-2110000000314342
-
-0100300780659673-10ALEA073	17220731-2191614702004822

@@ -85,8 +85,6 @@ def generate_db(event=None):
     :param event:
     :return:
     """
-
-
     url = "https://www.accessdata.fda.gov/cder/ndctext.zip"
     print("Downloading db from ", url)
     r = requests.get(url)
@@ -128,7 +126,7 @@ def generate_db(event=None):
 
 
 def run(event=None):
-    try:
+    # try:
         selection = var.get()
         if selection == 0:
             popupmsg("No barcode type selected. Please select type of barcode")
@@ -194,15 +192,18 @@ def run(event=None):
         elif selection == 2:
             # code for linear barcode below
             raw_barcode = barcode_text.get("1.0","end-1c")
-            pattern = re.compile(r"^\d(\d{10})\d$")
-            result = pattern.match(raw_barcode).groups()[0]
+            print(raw_barcode)
+            # pattern = re.compile(r"^\d(\d{10})\d$")
+            pattern = re.compile(r"^01\d{3}(\d{10})\d$|^\d(\d{10})\d$|(^\d{10}$)")
+            pattern_match = pattern.match(raw_barcode).groups()
+            ndc = next((item for item in pattern_match if item is not None), 'All are Nones')
 
             match, with_hyphen, ndc_11, package, brand, generic, dosage_form, route, mfg, \
-            strength, str_units, pharm_class = match_ndc(result)
+            strength, str_units, pharm_class = match_ndc(ndc)
 
             # print('Barcode Info ', result_dict)
             print('11 digit ndc: ', ndc_11)
-            print('Scanned NDC: ', result)
+            print('Scanned NDC: ', ndc)
             print('NDC with hyphen: ', with_hyphen)
             print('LOT: ', 'no LOT information in this barcode')
             print('Exp date: ', 'no EXP information in this barcode')
@@ -219,7 +220,7 @@ def run(event=None):
 
             # global ndc_11_result
             ndc_11_result["text"] = ndc_11
-            ndc_scanned_result["text"] = result
+            ndc_scanned_result["text"] = ndc
             ndc_hyphen_result["text"] = with_hyphen
             ndc_lot_result["text"] = "no LOT information in this barcode"
             ndc_exp_result["text"] = "no EXP information in this barcode"
@@ -232,20 +233,21 @@ def run(event=None):
             ndc_mfg_result["text"] = mfg
             ndc_class_result["text"] = pharm_class
             return 'break'
-    except:
-        if selection == 1:
-            sel = "2d barcode"
-        elif selection == 2:
-            sel = "linear barcode"
-        scan = raw_barcode
-        popupmsg("Barcode invalid, please double check:\n\n"
-                 "1. Barcode type selection. You selected: " + sel + "\n"
-                 "2. Barcode scanner is configured correctly\n"
-                 "3. Scanned barcode is correct. You scanned: " + scan + "\n"
-                 "4. Make sure there's a 'ndcdb' file in the same folder as this file.\n\n"
-                 "Program is still too ghetto to tell you which one of these is causing the error :)")
-        print("See error message")
-        return 'break'
+    # except:
+
+        # if selection == 1:
+        #     sel = "2d barcode"
+        # elif selection == 2:
+        #     sel = "linear barcode"
+        # scan = raw_barcode
+        # popupmsg("Barcode invalid, please double check:\n\n"
+        #          "1. Barcode type selection. You selected: " + sel + "\n"
+        #          "2. Barcode scanner is configured correctly\n"
+        #          "3. Scanned barcode is correct. You scanned: " + scan + "\n"
+        #          "4. Make sure there's a 'ndcdb' file in the same folder as this file.\n\n"
+        #          "Program is still too ghetto to tell you which one of these is causing the error :)")
+        # print("See error message")
+        # return 'break'
 
 
 def popupmsg(msg):
