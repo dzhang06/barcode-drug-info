@@ -33,13 +33,20 @@ the current directory
 
 ## Bugs
 
-1. The database column of NDC packages seem to only encompassed packaged NDCs (as the name implies). NDCs of items 
-packaged inside do not appear in that column. The package description column *does* have that information.
+1. None found! (yet)
 
 ## Planned features
 
-1. Parse through the package description column to incorporate packaged NDCs
+1. Parse NDCs with hyphens (thus expanding from only barcode items to more general use case)
 
+## Changelog
+
+- 0.2.0: 
+    - started versioning. 
+    - fixed recent bug where scanning a barcode inside a package (thus not in the 
+NDCPACKAGECODE column) does not come up with result.
+    - added a couple columns to the db to accomodate inclusion of NDCs inside of packaged NDCs found in the description 
+    column which also added to file size of db
 
 # Development
 
@@ -99,7 +106,8 @@ you.
 
 ### Examples of barcodes inputs that the script accepts
 
-*Note: Must configure barcode scanner to read FNC1 codes to add tab input.* 
+*Note: Must configure barcode scanner 
+to read FNC1 codes to add tab input.* 
 
 - 2d barcodes:
     - regex (matches following combination: GTIN-SN-EXP-LOT and GTIN-LOT-EXP-SN):

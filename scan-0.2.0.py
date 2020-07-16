@@ -23,6 +23,17 @@ def converter(unrefined_date):
     return parse(unrefined_date, yearfirst=True, fuzzy=True).strftime('%m/%d/%Y')
 
 
+def remove_hyphen(string):
+    """ removes hyphen from ndc """
+    return string.replace('-', '')
+
+
+def str_to_list(string):
+    new_list = list(string.strip('][').split(', '))
+    print("Returning a list? ", new_list, " of type: ", type(new_list))
+    return new_list
+
+
 def match_ndc(ndc):
     """ Matches the NDC to db"""
 
@@ -51,10 +62,24 @@ def match_ndc(ndc):
     recent_file = find_recent_db()
     df = pd.read_csv(recent_file)
     print('Using db from this file: ', recent_file)
-    df['NDCPACKAGECODE_nohyphen'] = df['NDCPACKAGECODE'].apply(lambda x: x.replace('-', ''))
-    if ndc in df['NDCPACKAGECODE_nohyphen'].values:
-        index = df.loc[df['NDCPACKAGECODE_nohyphen'] == ndc].index[0]
-        raw_ndc = df['NDCPACKAGECODE'][index]
+
+    # print("First entry of ndc package code no hyphen: ", df['NDCPACKAGECODE_nohyphen'][0], ", and type: ", type(df['NDCPACKAGECODE_nohyphen'][0]))
+    # print("First entry of ALL_NDC: ", df['ALL_NDC'][0], ", and type: ", type(df['ALL_NDC'][0]))
+
+    # below will be if ndc in df['NDCPACKAGECODE_nohyphen'].values: -- if ndc is found in a list of NDCs with no hyphen
+
+    # 012037086010010821TXZ811R4ZKNC	1723022810MT005
+    # if df['ALL_NDC'].apply(lambda x: ndc in x).sum() == 1:
+    # str_to_list = lambda x: x.strip('][').split(', ')
+    if df['ALL_NDC_NO_HYPHEN'].apply(lambda x: ndc in x).any():
+        index = df.loc[df['ALL_NDC_NO_HYPHEN'].apply(lambda x: ndc in x)].index[0]
+
+        # assign "raw_ndc" with hyphens by looking through column with list of all ndcs under a package
+        ndc_list = str_to_list(df['ALL_NDC'][index])
+        for check_ndc in ndc_list:
+            if ndc == remove_hyphen(check_ndc):
+                raw_ndc = check_ndc
+
         pack_desc = df['PACKAGEDESCRIPTION'][index]
         brand = df['PROPRIETARYNAME'][index]
         generic = df['NONPROPRIETARYNAME'][index]
@@ -122,11 +147,24 @@ def generate_db(event=None):
     # rename _x columns to the regular names
     joined.columns = joined.columns.str.replace('_x', '')
 
+    # Create new column of list of NDCs including package and item NDCs
+
+    def make_ndc_list(row):
+        pattern = re.compile(r"(\d{5}-\d{4}-\d{1})|(\d{5}-\d{3}-\d{2})|(\d{4}-\d{4}-\d{2})")
+        match_iter = pattern.finditer(row['PACKAGEDESCRIPTION'])
+        ndc_list = [ndc.group() for ndc in match_iter]
+        return ndc_list
+
+    # print("Type of the lambda apply: ", type(joined.apply(lambda row: make_ndc_list(row), axis=1)))
+    joined['ALL_NDC_TEMP'] = joined.apply(lambda row: make_ndc_list(row), axis=1)
+    joined['ALL_NDC_NO_HYPHEN'] = joined['ALL_NDC_TEMP'].apply(lambda row: ', '.join([remove_hyphen(x) for x in row]))
+    joined.drop(columns = 'ALL_NDC_TEMP', inplace=True)
+    joined['ALL_NDC'] = joined.apply(lambda row: ', '.join(make_ndc_list(row)), axis=1)
+
     joined.to_csv('ndcdb-' + dt_lastmodified + '.csv')
     os.rename(zip_file_name, 'ndctext-' + dt_lastmodified + '.zip')
 
     generate_completed = "Database generation completed"
-    print(generate_completed)
     popupmsg(generate_completed)
 
 
@@ -180,7 +218,8 @@ def parse_barcode(code):
             result_dict['NDC'] = result_dict['GTIN'][3:13]
             return result_dict
     else:
-        error_msg = "Not a valid barcode"
+        error_msg = "Not a valid barcode. Remember, NDCs with hyphens are not included in this search since" \
+                    "barcodes shouldn't(?) have hyphens in them."
         print(error_msg)
         popupmsg(error_msg)
         return None
