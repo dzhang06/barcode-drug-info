@@ -12,7 +12,7 @@ from datetime import datetime
 import requests
 import os
 
-version = "0.3.0
+version = "0.3.0"
 
 def convert_to_dict(lst):
     """ converts the one liner barcode string into individual components using dict """
