@@ -326,8 +326,12 @@ def copy_button(label):
     clip.update()
     clip.destroy()
     print('Copying: ', label.cget("text"))
-
-
+    
+    
+def clear(event=None):
+    barcode_text.delete(1.0,END)
+    
+    
 window = Tk()
 
 # var = IntVar() # used for radio button
@@ -336,14 +340,16 @@ window = Tk()
 window.title("Barcode Extraction Tool v0.2.0")
 intro_label = Label(window, text="Welcome to the barcode extraction tool. \n Please configure the barcode scanner "
                                  "appropriately to ensure this program works.\n"
-                                 "Scan barcode into box below and mark the correct type and hit submit")
+                                 "Scan barcode into box below and hit enter or the submit button.")
 
 # barcode_label = Label(window, text = "Scan 2d barcode into this box")
 barcode_text = Text(window, width=75, height=2, font=("Helvetica", 10), wrap='none')
 # box_barcode = Radiobutton(window, text="2d barcode", value=1, variable=var)
 # linear_barcode = Radiobutton(window, text="linear barcode", value=2, variable=var)
 proceed_button = Button(window, text="Submit", command=run)
+clear_button = Button(window, text="Clear", command=clear)
 barcode_text.bind('<Return>', run)
+barcode_text.bind('<BackSpace>', clear)
 generatedb_button = Button(window, text="Generate DB", command=generate_db)
 lastupdated_label = Label(window)
 close_button = Button(window, text="Quit", command=window.quit)
@@ -404,10 +410,11 @@ ndc_class_button = Button(window, text="Copy", command=partial(copy_button, ndc_
 
 intro_label.grid(row=0, column=0, columnspan=3, sticky=W + E)
 
-barcode_text.grid(row=1, rowspan=3, columnspan=2, sticky=E + S)
+barcode_text.grid(row=1, rowspan=3, columnspan=2, sticky=W + S)
 # box_barcode.grid(row=1, column=2, sticky=W)
 # linear_barcode.grid(row=2, column=2, sticky=W)
 proceed_button.grid(row=3, column=2, sticky=W)
+clear_button.grid(row=3,column=3,sticky=W)
 
 # barcode_label.grid(row=1,column=0,sticky=E)
 
@@ -462,6 +469,8 @@ ndc_mfg_button.grid(row=14, column=2, sticky=W)
 ndc_class_label.grid(row=15, column=0, sticky=W)
 ndc_class_result.grid(row=15, column=1, sticky=W)
 ndc_class_button.grid(row=15, column=2, sticky=W)
+
+barcode_text.focus_set()
 
 window.mainloop()
 
