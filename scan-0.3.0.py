@@ -12,6 +12,8 @@ from datetime import datetime
 import requests
 import os
 
+version = "0.3.0
+
 def convert_to_dict(lst):
     """ converts the one liner barcode string into individual components using dict """
     res_dct = {lst[i]: lst[i + 1] for i in range(0, len(lst), 2)}
@@ -337,7 +339,7 @@ window = Tk()
 # var = IntVar() # used for radio button
 # var.set(0) # for radio button
 
-window.title("Barcode Extraction Tool v0.2.0")
+window.title("Barcode Extraction Tool v" + version)
 intro_label = Label(window, text="Welcome to the barcode extraction tool. \n Please configure the barcode scanner "
                                  "appropriately to ensure this program works.\n"
                                  "Scan barcode into box below and hit enter or the submit button.")
