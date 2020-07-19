@@ -14,6 +14,7 @@ import os
 
 version = "0.3.0"
 
+
 def convert_to_dict(lst):
     """ converts the one liner barcode string into individual components using dict """
     res_dct = {lst[i]: lst[i + 1] for i in range(0, len(lst), 2)}
@@ -55,7 +56,7 @@ def match_ndc(ndc):
                 date = datetime.strptime(str_date, '%Y-%m-%d')
                 dates_list.append(date)
 
-            formatted_date = datetime.strftime(max(dates_list).date(), '%Y-%m-%d')
+            formatted_date = datetime.strftime(max(dates_list), '%Y-%m-%d')
 
             recent_db_file = 'ndcdb-' + formatted_date + '.csv'
             lastupdated_label["text"] = "Using data last updated on: " + formatted_date
@@ -78,6 +79,7 @@ def match_ndc(ndc):
 
         # assign "raw_ndc" with hyphens by looking through column with list of all ndcs under a package
         ndc_list = str_to_list(df['ALL_NDC'][index])
+        raw_ndc = ""
         for check_ndc in ndc_list:
             if ndc == remove_hyphen(check_ndc):
                 raw_ndc = check_ndc
@@ -160,7 +162,7 @@ def generate_db(event=None):
     # print("Type of the lambda apply: ", type(joined.apply(lambda row: make_ndc_list(row), axis=1)))
     joined['ALL_NDC_TEMP'] = joined.apply(lambda row: make_ndc_list(row), axis=1)
     joined['ALL_NDC_NO_HYPHEN'] = joined['ALL_NDC_TEMP'].apply(lambda row: ', '.join([remove_hyphen(x) for x in row]))
-    joined.drop(columns = 'ALL_NDC_TEMP', inplace=True)
+    joined.drop(columns='ALL_NDC_TEMP', inplace=True)
     joined['ALL_NDC'] = joined.apply(lambda row: ', '.join(make_ndc_list(row)), axis=1)
 
     joined.to_csv('ndcdb-' + dt_lastmodified + '.csv')
@@ -196,8 +198,16 @@ def parse_barcode(code):
     This barcode must be scanned by a configurable barcode scanner that can receive a FNC1 signal embedded into the
     barcode and converts it to a \t or tab input.
     """
+    # pattern = re.compile(
+    #     r"^01\d{3}(\d{10})\d$|^\d(\d{10})\d$|(^\d{10}$)|^(01){1}(\d{14})(21|10){1}(.+?)\t(17){1}(\d{6})(10|21){1}(.+)$")
+    # pattern = re.compile(
+    #     r"^01\d{3}(\d{10})\d$|^\d(\d{10})\d$|(^\d{10}$)|^(01){1}(\d{14})\ta?(21|10){1}(.+?)\t(17){1}(\d{6})(10|21){1}(.+)$"
+    # )
     pattern = re.compile(
-        r"^01\d{3}(\d{10})\d$|^\d(\d{10})\d$|(^\d{10}$)|^(01){1}(\d{14})(21|10){1}(.+?)\t(17){1}(\d{6})(10|21){1}(.+)$")
+        r"^01\d{3}(\d{10})\d$|^\d(\d{10})\d$|(^\d{10}$)|^(01){1}(\d{14})\ta?(21|10){1}(.+?)\t(17){1}(\d{6})(10|21){1}(.+)$|"
+        r"^(01){1}(\d{14})(21|10){1}(.+?)\t(17){1}(\d{6})(10|21){1}(.+)$|^(01){1}(\d{14})(17){1}(\d{6})(10){1}(.+)\t(21){1}(.+)$"
+    )
+
     match = pattern.search(code)
 
     if match:
@@ -328,12 +338,12 @@ def copy_button(label):
     clip.update()
     clip.destroy()
     print('Copying: ', label.cget("text"))
-    
-    
+
+
 def clear(event=None):
-    barcode_text.delete(1.0,END)
-    
-    
+    barcode_text.delete(1.0, END)
+
+
 window = Tk()
 
 # var = IntVar() # used for radio button
@@ -416,7 +426,7 @@ barcode_text.grid(row=1, rowspan=3, columnspan=2, sticky=W + S)
 # box_barcode.grid(row=1, column=2, sticky=W)
 # linear_barcode.grid(row=2, column=2, sticky=W)
 proceed_button.grid(row=3, column=2, sticky=W)
-clear_button.grid(row=3,column=3,sticky=W)
+clear_button.grid(row=3, column=3, sticky=W)
 
 # barcode_label.grid(row=1,column=0,sticky=E)
 

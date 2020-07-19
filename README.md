@@ -33,7 +33,13 @@ the current directory
 
 ## Bugs
 
-1. None found! (yet)
+1. Relabeled/repackaged drugs aren't in the FDA NDC list. Those NDCs won't scan
+2. Sterile manufacturing pharmacy products sometimes have their own format
+    - for example from CAPS oxytocin.. barcode includes a newline??
+        - ```(17)200909```
+        - ``(10)3600000045552``
+
+
 
 ## Planned features
 
@@ -41,12 +47,37 @@ the current directory
 
 ## Changelog
 
+- 0.3.0:
+    - fixed barcode pattern that incorporates 2 tabs in it GTIN, \t, SN, \t, EXP, LOT
+        - for example ``0100344567241101	21EGT8ANNRF9	1722093010108554C``, Lovenox
+    - fixed barcode pattern arranged GTIN, EXP, LOT, \t, SN
+        - for example ``010036332356887017221031109L866A	21S1170207584837 ``
+    - added a focus on the text field, a "clear" button to clear the text field, and the <BackSpace> keyboard input will
+    automatically clear the text field as well
+
 - 0.2.0: 
     - started versioning. 
     - fixed recent bug where scanning a barcode inside a package (thus not in the 
 NDCPACKAGECODE column) does not come up with result.
     - added a couple columns to the db to accomodate inclusion of NDCs inside of packaged NDCs found in the description 
-    column which also added to file size of db
+    column which also added to file size of database
+
+The following barcode formats are supported:
+
+- GTIN, SN, \t, EXP, LOT
+- GTIN, LOT, \t, EXP, SN
+- GTIN, EXP, LOT, \t, SN
+- GTIN, \t, SN, \t, EXP, LOT
+- GTIN, \t, LOT, \t, EXP, SN
+- 16 digit linear: 01 3 random digits, 10 digit NDC, 1 random digit
+- 12 digit linear: 1 random digit, 10 digit NDC, 1 random digit
+- 10 digit NDC
+
+NOT supported:
+
+- hyphenated NDC
+- 11 digit NDC
+
 
 # Development
 
