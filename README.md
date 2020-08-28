@@ -44,6 +44,8 @@ the current directory
 ## Planned features
 
 1. Parse NDCs with hyphens (thus expanding from only barcode items to more general use case)
+2. Parse GS1 stacked barcodes containing NDC, LOT, and EXP
+    - for example: ```01003606875351111722060010193028```
 
 ## Changelog
 
