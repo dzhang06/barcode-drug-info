@@ -38,8 +38,9 @@ the current directory
     - for example from CAPS oxytocin.. barcode includes a newline??
         - ```(17)200909```
         - ``(10)3600000045552``
-
-
+3. Expiration dates coded into barcode with a *day* of 00 
+(example 0100360505464333211114192	172201001024019042, having expiration date of 1/31/2022) 
+will generate an error.
 
 ## Planned features
 
