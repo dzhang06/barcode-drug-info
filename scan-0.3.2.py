@@ -83,9 +83,16 @@ def match_ndc(ndc):
     # 012037086010010821TXZ811R4ZKNC	1723022810MT005
     # if df['ALL_NDC'].apply(lambda x: ndc in x).sum() == 1:
     # str_to_list = lambda x: x.strip('][').split(', ')
-    if df['ALL_NDC_NO_HYPHEN'].apply(lambda x: ndc in x).any():
-        index = df.loc[df['ALL_NDC_NO_HYPHEN'].apply(lambda x: ndc in x)].index[0]
-
+    search_query = df.loc[df.loc[:, 'ALL_NDC_NO_HYPHEN'] == ndc]
+    if search_query.empty is True:
+        error_msg = "NDC doesn't exist in database? If drug is new or unofficial "\
+            "(or maybe OTC? not sure if those are in there.., "\
+            "may require updating database?"
+        print(error_msg)
+        # popupmsg(error_msg)
+    else:
+        index = search_query.index.values[0]
+        print(df['ALL_NDC'][index])
         # assign "raw_ndc" with hyphens by looking through column with list of all ndcs under a package
         ndc_list = str_to_list(df['ALL_NDC'][index])
         raw_ndc = ""
@@ -104,7 +111,8 @@ def match_ndc(ndc):
         pharm_class = df['PHARM_CLASSES'][index]
 
         def eleven_dig(ten_digit):
-            """ changes 10 digit ndc to 11 digit ndc adding the zero to the appropriate place """
+            """ changes 10 digit ndc to 11 digit ndc adding the zero
+            to the appropriate place """
             lst = ten_digit.split("-")
             lst[0] = lst[0].zfill(5)
             lst[1] = lst[1].zfill(4)
@@ -112,13 +120,8 @@ def match_ndc(ndc):
             return ''.join(lst)
 
         ten_dig = eleven_dig(raw_ndc)
-        return True, raw_ndc, ten_dig, pack_desc, brand, generic, dosage_form, route, mfg, strength, \
-               str_units, pharm_class
-    else:
-        error_msg = "NDC doesn't exist in database? If drug is new or unofficial (or maybe OTC? not sure if those are" \
-                    " in there.., may require updating database?"
-        print(error_msg)
-        popupmsg(error_msg)
+        return True, raw_ndc, ten_dig, pack_desc, brand, generic, dosage_form,\
+            route, mfg, strength, str_units, pharm_class
 
 
 def generate_db(event=None):
