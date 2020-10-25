@@ -41,6 +41,8 @@ the current directory
 3. Expiration dates coded into barcode with a *day* of 00 
 (example 0100360505464333211114192	172201001024019042, having expiration date of 1/31/2022) 
 will generate an error.
+4. 0120370860301253217KNNV8GGACNF	10E001A00817211231 (format GTIN, SN, LOT, EXP ==> first barcode with EXP at end) 
+
 
 ## Planned features
 
